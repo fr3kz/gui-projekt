@@ -15,4 +15,9 @@ public class FreeBundle extends Bundle {
     public int getPrice(PriceList priceList, SubscriptionStatus status) {
         return priceList.getPrice(type, name, periods, status);
     }
+
+    @Override
+    public void setPeriods(int periods) {
+        super.setPeriods(1);
+    }
 }

@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static utilities.Utilities.getKey;
+
 
 public class Client {
     private String name;
@@ -19,6 +21,7 @@ public class Client {
     private SubscriptionStatus subscriptionStatus;
     private Wishlist wishlist;
     private Basket basket;
+    private boolean UsedFreeBundle;
     private Map<String, Bundle> lastTransaction = new HashMap<>();
 
     public Client(String name, double wallet, SubscriptionStatus subscriptionStatus) {
@@ -27,6 +30,7 @@ public class Client {
         this.subscriptionStatus = subscriptionStatus;
         this.wishlist = new Wishlist();
         this.basket = new Basket();
+        this.UsedFreeBundle = false;
     }
 
     public void add(Bundle bundle) {
@@ -88,7 +92,7 @@ public class Client {
 
     private void payPartially(PaymentMethod method) {
         PriceList priceList = PriceList.getPricelist();
-        List<Bundle> affordableBundles = new ArrayList<>();
+        List<Bundle> BundlestoBuy = new ArrayList<>();
         double remainingMoney = wallet;
 
         List<Bundle> sortedBundles = basket.getBundles();
@@ -97,11 +101,11 @@ public class Client {
         lastTransaction.clear();
 
         for (Bundle bundle : sortedBundles) {
-            int unitPrice = bundle.getPrice(priceList, subscriptionStatus);
-            int maxPeriods = (int) (remainingMoney / unitPrice);
+            int price = bundle.getPrice(priceList, subscriptionStatus);
+            int maxPeriods = (int) (remainingMoney / price);
 
             if (method == PaymentMethod.CARD) {
-                maxPeriods = (int) (remainingMoney / (unitPrice * 1.02));
+                maxPeriods = (int) (remainingMoney / (price * 1.02));
             }
 
             if (maxPeriods > 0) {
@@ -114,22 +118,22 @@ public class Client {
                     bundle.setPeriods(periodsToKeep);
                 }
 
-                double cost = periodsToKeep * unitPrice;
+                double cost = periodsToKeep * price;
                 if (method == PaymentMethod.CARD) {
                     cost *= 1.02;
                 }
 
                 remainingMoney -= cost;
-                affordableBundles.add(bundle);
+                BundlestoBuy.add(bundle);
 
-                String key = bundle.getType() + "_" + bundle.getName();
+                String key = getKey(bundle.getType(), bundle.getName());
                 lastTransaction.put(key, bundle);
             }
         }
 
         basket.clear();
         for (Bundle bundle : sortedBundles) {
-            if (!affordableBundles.contains(bundle)) {
+            if (!BundlestoBuy.contains(bundle)) {
                 basket.add(bundle);
             }
         }
@@ -154,7 +158,7 @@ public class Client {
     }
 
     public void returnGB(Type type, String name, int periods) {
-        String key = type + "_" + name;
+        String key = getKey(type, name);
         Bundle bundle = lastTransaction.get(key);
 
         if (bundle != null) {
