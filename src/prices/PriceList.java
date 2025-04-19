@@ -3,7 +3,7 @@ package prices;
 import bundles.enums.SubscriptionStatus;
 import bundles.enums.Type;
 import prices.interfaces.Price;
-
+import static utilities.Utilities.getKey;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +13,7 @@ public class PriceList {
 
     private PriceList() {}
 
-    // Singleton wzorzec
+    // Singleton
     public static PriceList getPricelist() {
         if (instance == null) {
             instance = new PriceList();
@@ -52,7 +52,4 @@ public class PriceList {
         return price.getPrice(periods, status);
     }
 
-    private String getKey(Type type, String name) {
-        return type + "_" + name;
-    }
 }

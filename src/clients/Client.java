@@ -7,7 +7,6 @@ import bundles.enums.PaymentMethod;
 import bundles.enums.SubscriptionStatus;
 import bundles.enums.Type;
 import prices.PriceList;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,15 +14,15 @@ import java.util.Map;
 
 
 public class Client {
-    private String id;
+    private String name;
     private double wallet;
     private SubscriptionStatus subscriptionStatus;
     private Wishlist wishlist;
     private Basket basket;
     private Map<String, Bundle> lastTransaction = new HashMap<>();
 
-    public Client(String id, double wallet, SubscriptionStatus subscriptionStatus) {
-        this.id = id;
+    public Client(String name, double wallet, SubscriptionStatus subscriptionStatus) {
+        this.name = name;
         this.wallet = wallet;
         this.subscriptionStatus = subscriptionStatus;
         this.wishlist = new Wishlist();
@@ -51,16 +50,16 @@ public class Client {
         basket.clear();
         PriceList priceList = PriceList.getPricelist();
 
-        List<Bundle> toBeMoved = new ArrayList<>();
+        List<Bundle> toBeDeleted = new ArrayList<>();
 
         for (Bundle bundle : wishlist.getBundles()) {
             if (bundle.getPrice(priceList, subscriptionStatus) != -1) {
                 basket.add(bundle);
-                toBeMoved.add(bundle);
+                toBeDeleted.add(bundle);
             }
         }
 
-        for (Bundle bundle : toBeMoved) {
+        for (Bundle bundle : toBeDeleted) {
             wishlist.remove(bundle);
         }
     }
@@ -92,7 +91,7 @@ public class Client {
         List<Bundle> affordableBundles = new ArrayList<>();
         double remainingMoney = wallet;
 
-        List<Bundle> sortedBundles = new ArrayList<>(basket.getBundles());
+        List<Bundle> sortedBundles = basket.getBundles();
         sortedBundles.sort((b1, b2) -> {
             int price1 = b1.getPrice(priceList, subscriptionStatus);
             int price2 = b2.getPrice(priceList, subscriptionStatus);

@@ -1,11 +1,12 @@
-package basckets;
+package utilities;
 
 import bundles.Bundle;
+import bundles.enums.Type;
 
 import java.util.List;
 
 public class Utilities {
-    static String getString(List<Bundle> bundles) {
+    public static String getString(List<Bundle> bundles) {
         if (bundles.isEmpty()) {
             return "-- pusto";
         }
@@ -17,5 +18,9 @@ public class Utilities {
             }
         }
         return sb.toString();
+    }
+
+    public static String getKey(Type type, String name) {
+        return type + "_" + name;
     }
 }
