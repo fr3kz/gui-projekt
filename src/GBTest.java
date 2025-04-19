@@ -48,7 +48,7 @@ public class GBTest {
 
         // Lista życzeń klienta lte
         Wishlist listaLte = lte.getWishlist();
-        System.out.println("Lista życzeń klienta " + listaLte);
+        System.out.print("Lista życzeń klienta "+lte.getName() + " "+ listaLte +"\n");
 
         // Przed płaceniem, klient przepakuje pakiety z listy życzeń do koszyka
         Basket koszykLte = lte.getBasket();

@@ -45,6 +45,10 @@ public class Client {
         return basket;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public double getWallet() {
         return wallet;
     }
