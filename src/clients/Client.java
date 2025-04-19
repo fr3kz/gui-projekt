@@ -92,11 +92,7 @@ public class Client {
         double remainingMoney = wallet;
 
         List<Bundle> sortedBundles = basket.getBundles();
-        sortedBundles.sort((b1, b2) -> {
-            int price1 = b1.getPrice(priceList, subscriptionStatus);
-            int price2 = b2.getPrice(priceList, subscriptionStatus);
-            return Integer.compare(price1, price2);
-        });
+        sortedBundles.sort(Bundle.priceComparator(priceList, subscriptionStatus));
 
         lastTransaction.clear();
 

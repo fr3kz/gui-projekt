@@ -4,6 +4,8 @@ import bundles.enums.SubscriptionStatus;
 import bundles.enums.Type;
 import prices.PriceList;
 
+import java.util.Comparator;
+
 public abstract class Bundle {
     protected String name;
     protected int periods;
@@ -26,6 +28,9 @@ public abstract class Bundle {
         return type;
     }
 
+    public static Comparator<Bundle> priceComparator(PriceList priceList, SubscriptionStatus status) {
+        return Comparator.comparingInt(bundle -> bundle.getPrice(priceList, status));
+    }
 
 
     public void setPeriods(int periods) {
