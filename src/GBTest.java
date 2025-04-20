@@ -48,17 +48,17 @@ public class GBTest {
 
         // Lista życzeń klienta lte
         Wishlist listaLte = lte.getWishlist();
-        System.out.print("Lista życzeń klienta "+lte.getName() + " "+ listaLte +"\n");
+        System.out.println("Lista życzeń klienta "+lte.getName() + " \n"+ listaLte +"\n");
 
         // Przed płaceniem, klient przepakuje pakiety z listy życzeń do koszyka
         Basket koszykLte = lte.getBasket();
         lte.pack();
 
         // Co jest na liście życzeń klienta lte
-        System.out.println("Po przepakowaniu, lista życzeń klienta " + lte.getWishlist());
+        System.out.println("Po przepakowaniu, lista życzeń klienta " + lte.getWishlist() + " \n");
 
         // Co jest w koszyku klienta lte
-        System.out.println("Po przepakowaniu, koszyk klienta " + koszykLte);
+        System.out.println("Po przepakowaniu, koszyk klienta " + koszykLte + " \n" );
 
         // Ile wynosi cena wszystkich pakietów o nazwie 5GB w koszyku klienta lte
         System.out.println("Pakiety 5GB w koszyku klienta lte kosztowały: " + price("5GB", koszykLte));
@@ -71,7 +71,7 @@ public class GBTest {
 
         // Koszyk po zapłaceniu
         System.out.println("Po zapłaceniu, koszyk klienta " + lte.getBasket());
-        System.out.println("Po zapłaceniu, koszyk klienta " + koszykLte);
+        System.out.println("Po zapłaceniu, koszyk klienta " + koszykLte+ " \n");
 
         // Teraz przychodzi klient gsm,
         // deklaruje 65 zł na zamówienia
@@ -82,7 +82,7 @@ public class GBTest {
         gsm.add(new LongBundle("30GB", 1));
 
         // Co klient gsm ma na swojej liście życzeń
-        System.out.println("Lista życzeń klienta " + gsm.getWishlist());
+        System.out.println("Lista życzeń klienta "+ " \n" + gsm.getWishlist());
 
         Basket koszykGsm = gsm.getBasket();
         gsm.pack();
@@ -91,7 +91,7 @@ public class GBTest {
         System.out.println("Po przepakowaniu, lista życzeń klienta " + gsm.getWishlist());
 
         // A co jest w koszyku klienta gsm
-        System.out.println("Po przepakowaniu, koszyk klienta " + gsm.getBasket());
+        System.out.println("Po przepakowaniu, koszyk klienta " + " \n" + gsm.getBasket());
 
         // klient gsm płaci
         gsm.pay(PaymentMethod.TRANSFER, true);
@@ -102,12 +102,12 @@ public class GBTest {
         // Co zostało w koszyku klienta gsm (za mało pieniędzy miał)
         System.out.println("Po zapłaceniu, koszyk klienta " + koszykGsm);
 
-        gsm.returnGB(Type.LONG, "30GB", 1);    // zwrot (do koszyka) pakietu (na 1 okres) z ostatniej transakcji
+        gsm.returnGB(Type.MID, "10GB", 1);    // zwrot (do koszyka) pakietu (na 1 okres) z ostatniej transakcji
 
         // Ile klientowi gsm zostało pieniędzy?
         System.out.println("Po zwrocie, klientowi gsm zostało: " + String.format("%.2f", gsm.getWallet()) + " zł");
 
         // Co zostało w koszyku klienta gsm
-        System.out.println("Po zwrocie, koszyk klienta " + koszykGsm);
+        System.out.println("Po zwrocie, koszyk klienta \n" + koszykGsm);
     }
 }

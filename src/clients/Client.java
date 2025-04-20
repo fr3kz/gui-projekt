@@ -23,6 +23,7 @@ public class Client {
     private Basket basket;
     private boolean UsedFreeBundle;
     private Map<String, Bundle> lastTransaction = new HashMap<>();
+    private List<Bundle> purchasedBundles = new ArrayList<>();
 
     public Client(String name, double wallet, SubscriptionStatus subscriptionStatus) {
         this.name = name;
@@ -74,16 +75,16 @@ public class Client {
 
     public void pay(PaymentMethod method, boolean partial) {
         double totalPrice = basket.getTotalPrice(subscriptionStatus);
-
         double finalPrice = method == PaymentMethod.CARD ? totalPrice * 1.02 : totalPrice;
 
         if (wallet >= finalPrice) {
             lastTransaction.clear();
+            purchasedBundles.clear();
             for (Bundle bundle : basket.getBundles()) {
-                String key = bundle.getType() + "_" + bundle.getName();
+                String key = getKey(bundle.getType(), bundle.getName());
                 lastTransaction.put(key, bundle);
+                purchasedBundles.add(bundle);
             }
-
             wallet -= finalPrice;
             basket.clear();
         } else if (partial) {
@@ -94,56 +95,60 @@ public class Client {
         }
     }
 
+
     private void payPartially(PaymentMethod method) {
         PriceList priceList = PriceList.getPricelist();
-        List<Bundle> BundlestoBuy = new ArrayList<>();
+        List<Bundle> toReturnToBasket = new ArrayList<>();
         double remainingMoney = wallet;
 
-        List<Bundle> sortedBundles = basket.getBundles();
+        List<Bundle> sortedBundles = new ArrayList<>(basket.getBundles());
         sortedBundles.sort(Bundle.priceComparator(priceList, subscriptionStatus));
 
         lastTransaction.clear();
-
-        for (Bundle bundle : sortedBundles) {
-            int price = bundle.getPrice(priceList, subscriptionStatus);
-            int maxPeriods = (int) (remainingMoney / price);
-
-            if (method == PaymentMethod.CARD) {
-                maxPeriods = (int) (remainingMoney / (price * 1.02));
-            }
-
-            if (maxPeriods > 0) {
-                int periodsToKeep = Math.min(maxPeriods, bundle.getPeriods());
-
-                if (periodsToKeep < bundle.getPeriods()) {
-                    Bundle remainingBundle = createBundleOfType(bundle.getType(), bundle.getName(), bundle.getPeriods() - periodsToKeep);
-                    basket.add(remainingBundle);
-
-                    bundle.setPeriods(periodsToKeep);
-                }
-
-                double cost = periodsToKeep * price;
-                if (method == PaymentMethod.CARD) {
-                    cost *= 1.02;
-                }
-
-                remainingMoney -= cost;
-                BundlestoBuy.add(bundle);
-
-                String key = getKey(bundle.getType(), bundle.getName());
-                lastTransaction.put(key, bundle);
-            }
-        }
+        purchasedBundles.clear();
 
         basket.clear();
+
         for (Bundle bundle : sortedBundles) {
-            if (!BundlestoBuy.contains(bundle)) {
+            int fullPrice = bundle.getPrice(priceList, subscriptionStatus)*bundle.getPeriods();
+            int periods = bundle.getPeriods();
+
+            if (periods <= 0) continue;
+
+            double pricePerPeriod = fullPrice / (double) periods;
+
+            if (method == PaymentMethod.CARD) {
+                pricePerPeriod *= 1.02;
+            }
+
+            int affordablePeriods = (int) (remainingMoney / pricePerPeriod);
+
+            if (affordablePeriods >= periods) {
+                remainingMoney -= pricePerPeriod * periods;
+                String key = getKey(bundle.getType(), bundle.getName());
+                lastTransaction.put(key, bundle);
+                purchasedBundles.add(bundle);
+            } else if (affordablePeriods > 0) {
+                Bundle partialBundle = createBundleOfType(bundle.getType(), bundle.getName(), affordablePeriods);
+                String key = getKey(partialBundle.getType(), partialBundle.getName());
+                lastTransaction.put(key, partialBundle);
+                purchasedBundles.add(partialBundle);
+                remainingMoney -= pricePerPeriod * affordablePeriods;
+
+                int leftover = periods - affordablePeriods;
+                Bundle leftoverBundle = createBundleOfType(bundle.getType(), bundle.getName(), leftover);
+                basket.add(leftoverBundle);
+            } else {
+
                 basket.add(bundle);
             }
         }
 
         wallet = remainingMoney;
     }
+
+
+
 
 
     private Bundle createBundleOfType(Type type, String name, int periods) {
@@ -166,11 +171,21 @@ public class Client {
         Bundle bundle = lastTransaction.get(key);
 
         if (bundle != null) {
-            int price = bundle.getPrice(PriceList.getPricelist(), subscriptionStatus);
-            wallet += price * periods;
+            int fullPrice = bundle.getPrice(PriceList.getPricelist(), subscriptionStatus);
+            int totalPeriods = bundle.getPeriods();
+
+            if (periods > totalPeriods) {
+                periods = totalPeriods;
+            }
+
+            wallet += fullPrice * periods;
 
             Bundle returnedBundle = createBundleOfType(type, name, periods);
             basket.add(returnedBundle);
         }
     }
+
+
+
+
 }
