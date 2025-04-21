@@ -108,7 +108,6 @@ public class Client {
         PriceList priceList = PriceList.getPricelist();
         double remainingMoney = wallet;
 
-        List<Bundle> toReturnToBasket = new ArrayList<>();
         List<Bundle> sortedBundles = new ArrayList<>(basket.getBundles());
 
         sortedBundles.sort(Bundle.priceComparator(priceList, subscriptionStatus));
@@ -117,7 +116,7 @@ public class Client {
         basket.clear();
 
         for (Bundle bundle : sortedBundles) {
-            int Price = bundle.getPrice(priceList, subscriptionStatus);
+            double Price = bundle.getPrice(priceList, subscriptionStatus);
 
             int periods = bundle.getPeriods();
             if (periods <= 0) continue;
@@ -126,7 +125,7 @@ public class Client {
                 Price *= 1.02;
             }
 
-            int affordablePeriods = (int) (remainingMoney / Price);
+            int affordablePeriods = (int) (remainingMoney /Price);
 
             if (affordablePeriods >= periods) {
                 remainingMoney -= Price * periods;
