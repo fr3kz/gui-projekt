@@ -17,7 +17,7 @@ public class GBTest {
 
         for (Bundle bundle : b.getBundles()) {
             if (bundle.getName().equals(bundleName)) {
-                int unitPrice = bundle.getPrice(priceList, null);
+                int unitPrice = bundle.getPrice(priceList, b.getStatus());
                 if (unitPrice != -1) {
                     totalPrice += unitPrice * bundle.getPeriods();
                 }
@@ -45,6 +45,9 @@ public class GBTest {
         lte.add(new MidBundle("10GB", 3));
         lte.add(new LongBundle("30GB", 2));
         lte.add(new FreeBundle("2GB", 2));
+        //nie dodaje 2 raz
+        lte.add(new FreeBundle("2GB", 2));
+
 
         // Lista życzeń klienta lte
         Wishlist listaLte = lte.getWishlist();
@@ -72,7 +75,6 @@ public class GBTest {
         // Koszyk po zapłaceniu
         System.out.println("Po zapłaceniu, koszyk klienta " + lte.getBasket());
         System.out.println("Po zapłaceniu, koszyk klienta " + koszykLte+ " \n");
-
         // Teraz przychodzi klient gsm,
         // deklaruje 65 zł na zamówienia
         Client gsm = new Client("gsm", 65, SubscriptionStatus.NO);

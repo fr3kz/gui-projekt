@@ -23,19 +23,25 @@ public class Client {
     private Basket basket;
     private boolean UsedFreeBundle;
     private Map<String, Bundle> lastTransaction = new HashMap<>();
-    private List<Bundle> purchasedBundles = new ArrayList<>();
-
     public Client(String name, double wallet, SubscriptionStatus subscriptionStatus) {
         this.name = name;
         this.wallet = wallet;
         this.subscriptionStatus = subscriptionStatus;
-        this.wishlist = Wishlist.getInstance();
-        this.basket = Basket.getInstance();
+        this.wishlist = new Wishlist();
+        this.basket = new Basket();
         this.UsedFreeBundle = false;
-
+        this.wishlist.setStatus(subscriptionStatus);
+        this.basket.setStatus(subscriptionStatus);
     }
 
     public void add(Bundle bundle) {
+        if(bundle.getType() == Type.FREE){
+            if(!UsedFreeBundle){
+                UsedFreeBundle = true;
+            }else {
+                return;
+            }
+        }
         wishlist.add(bundle);
     }
 
@@ -80,11 +86,9 @@ public class Client {
 
         if (wallet >= finalPrice) {
             lastTransaction.clear();
-            purchasedBundles.clear();
             for (Bundle bundle : basket.getBundles()) {
                 String key = getKey(bundle.getType(), bundle.getName());
                 lastTransaction.put(key, bundle);
-                purchasedBundles.add(bundle);
             }
             wallet -= finalPrice;
             basket.clear();
@@ -106,7 +110,7 @@ public class Client {
         sortedBundles.sort(Bundle.priceComparator(priceList, subscriptionStatus));
 
         lastTransaction.clear();
-        purchasedBundles.clear();
+
 
         basket.clear();
 
@@ -128,12 +132,10 @@ public class Client {
                 remainingMoney -= pricePerPeriod * periods;
                 String key = getKey(bundle.getType(), bundle.getName());
                 lastTransaction.put(key, bundle);
-                purchasedBundles.add(bundle);
             } else if (affordablePeriods > 0) {
                 Bundle partialBundle = createBundleOfType(bundle.getType(), bundle.getName(), affordablePeriods);
                 String key = getKey(partialBundle.getType(), partialBundle.getName());
                 lastTransaction.put(key, partialBundle);
-                purchasedBundles.add(partialBundle);
                 remainingMoney -= pricePerPeriod * affordablePeriods;
 
                 int leftover = periods - affordablePeriods;

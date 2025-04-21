@@ -10,6 +10,9 @@ public abstract class Bundle {
     protected String name;
     protected int periods;
     protected Type type;
+
+    private boolean isUsed = false;
+
     public Bundle(String name, int periods) {
         this.name = name;
         this.periods = periods;
@@ -27,6 +30,14 @@ public abstract class Bundle {
         return type;
     }
 
+    public boolean isUsed() {
+        return isUsed;
+    }
+
+    public void setUsed(boolean used) {
+        isUsed = used;
+    }
+
     public static Comparator<Bundle> priceComparator(PriceList priceList, SubscriptionStatus status) {
         return Comparator.comparingInt(bundle -> bundle.getPrice(priceList, status));
     }
@@ -41,6 +52,13 @@ public abstract class Bundle {
     @Override
     public String toString() {
         int price = getPrice(PriceList.getPricelist(),null);
+        String pricestr = price == -1 ? "Brak ceny" : "Cena: " + price;
+        return name + ", typ: " + getTypeName() + ", ile: " + periods + " " +
+                (periods == 1 ? "okres" : "okresy") + ", " + pricestr;
+    }
+
+    public String toString(SubscriptionStatus status) {
+        int price = getPrice(PriceList.getPricelist(),status);
         String pricestr = price == -1 ? "Brak ceny" : "Cena: " + price;
         return name + ", typ: " + getTypeName() + ", ile: " + periods + " " +
                 (periods == 1 ? "okres" : "okresy") + ", " + pricestr;
