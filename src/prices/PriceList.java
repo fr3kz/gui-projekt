@@ -21,6 +21,7 @@ public class PriceList {
         return instance;
     }
 
+    //Dodawanie roznych typow cen do cennika
     public void add(Type type, String name, int singlePrice, int mediumPrice, int lowPrice, int threshold) {
         String key = getKey(type, name);
         prices.put(key, new ShortPrice(singlePrice, mediumPrice, lowPrice, threshold));
@@ -41,6 +42,7 @@ public class PriceList {
         prices.put(key, new FreePrice());
     }
 
+    //wyszukiwanie w cenniku pozycji
     public int getPrice(Type type, String name, int periods, SubscriptionStatus status) {
         String key = getKey(type, name);
         Price price = prices.get(key);

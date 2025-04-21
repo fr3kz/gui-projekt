@@ -23,6 +23,7 @@ public class Client {
     private Basket basket;
     private boolean UsedFreeBundle;
     private Map<String, Bundle> lastTransaction = new HashMap<>();
+
     public Client(String name, double wallet, SubscriptionStatus subscriptionStatus) {
         this.name = name;
         this.wallet = wallet;
@@ -61,7 +62,6 @@ public class Client {
         return wallet;
     }
 
-
     public void pack() {
         basket.clear();
         PriceList priceList = PriceList.getPricelist();
@@ -86,12 +86,15 @@ public class Client {
 
         if (wallet >= finalPrice) {
             lastTransaction.clear();
+
             for (Bundle bundle : basket.getBundles()) {
                 String key = getKey(bundle.getType(), bundle.getName());
                 lastTransaction.put(key, bundle);
             }
+
             wallet -= finalPrice;
             basket.clear();
+
         } else if (partial) {
             payPartially(method);
         } else {
@@ -103,56 +106,50 @@ public class Client {
 
     private void payPartially(PaymentMethod method) {
         PriceList priceList = PriceList.getPricelist();
-        List<Bundle> toReturnToBasket = new ArrayList<>();
         double remainingMoney = wallet;
 
+        List<Bundle> toReturnToBasket = new ArrayList<>();
         List<Bundle> sortedBundles = new ArrayList<>(basket.getBundles());
+
         sortedBundles.sort(Bundle.priceComparator(priceList, subscriptionStatus));
 
         lastTransaction.clear();
-
-
         basket.clear();
 
         for (Bundle bundle : sortedBundles) {
-            int fullPrice = bundle.getPrice(priceList, subscriptionStatus)*bundle.getPeriods();
-            int periods = bundle.getPeriods();
+            int Price = bundle.getPrice(priceList, subscriptionStatus);
 
+            int periods = bundle.getPeriods();
             if (periods <= 0) continue;
 
-            double pricePerPeriod = fullPrice / (double) periods;
-
             if (method == PaymentMethod.CARD) {
-                pricePerPeriod *= 1.02;
+                Price *= 1.02;
             }
 
-            int affordablePeriods = (int) (remainingMoney / pricePerPeriod);
+            int affordablePeriods = (int) (remainingMoney / Price);
 
             if (affordablePeriods >= periods) {
-                remainingMoney -= pricePerPeriod * periods;
+                remainingMoney -= Price * periods;
+
                 String key = getKey(bundle.getType(), bundle.getName());
                 lastTransaction.put(key, bundle);
+
             } else if (affordablePeriods > 0) {
                 Bundle partialBundle = createBundleOfType(bundle.getType(), bundle.getName(), affordablePeriods);
                 String key = getKey(partialBundle.getType(), partialBundle.getName());
                 lastTransaction.put(key, partialBundle);
-                remainingMoney -= pricePerPeriod * affordablePeriods;
+                remainingMoney -= Price * affordablePeriods;
 
                 int leftover = periods - affordablePeriods;
                 Bundle leftoverBundle = createBundleOfType(bundle.getType(), bundle.getName(), leftover);
                 basket.add(leftoverBundle);
             } else {
-
                 basket.add(bundle);
             }
         }
 
         wallet = remainingMoney;
     }
-
-
-
-
 
     private Bundle createBundleOfType(Type type, String name, int periods) {
         switch (type) {
@@ -174,14 +171,14 @@ public class Client {
         Bundle bundle = lastTransaction.get(key);
 
         if (bundle != null) {
-            int fullPrice = bundle.getPrice(PriceList.getPricelist(), subscriptionStatus);
+            int Price = bundle.getPrice(PriceList.getPricelist(), subscriptionStatus);
             int totalPeriods = bundle.getPeriods();
 
             if (periods > totalPeriods) {
                 periods = totalPeriods;
             }
 
-            wallet += fullPrice * periods;
+            wallet += Price * periods;
 
             Bundle returnedBundle = createBundleOfType(type, name, periods);
             basket.add(returnedBundle);
