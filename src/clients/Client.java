@@ -29,9 +29,10 @@ public class Client {
         this.name = name;
         this.wallet = wallet;
         this.subscriptionStatus = subscriptionStatus;
-        this.wishlist = new Wishlist();
-        this.basket = new Basket();
+        this.wishlist = Wishlist.getInstance();
+        this.basket = Basket.getInstance();
         this.UsedFreeBundle = false;
+
     }
 
     public void add(Bundle bundle) {

@@ -10,7 +10,6 @@ public abstract class Bundle {
     protected String name;
     protected int periods;
     protected Type type;
-
     public Bundle(String name, int periods) {
         this.name = name;
         this.periods = periods;
@@ -46,6 +45,7 @@ public abstract class Bundle {
         return name + ", typ: " + getTypeName() + ", ile: " + periods + " " +
                 (periods == 1 ? "okres" : "okresy") + ", " + pricestr;
     }
+
 
     protected String getTypeName() {
         switch (type) {
